@@ -1,4 +1,7 @@
+import webbrowser
 from contextlib import contextmanager
+from pathlib import Path
+from platform import uname
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -259,6 +262,23 @@ class Console:
         import sys
 
         return sys.stdout.isatty()
+
+    def open_browser(self, rel_parent_path, file: str = "index.html"):
+        if "Microsoft" in uname().release:
+            url = Path(rel_parent_path) / file
+        else:
+            url = (Path.cwd() / rel_parent_path).resolve() / file
+
+        opened = webbrowser.open(url.as_uri())
+
+        if not opened:
+            ui.error_write(
+                f"Failed to open {url.as_uri()}. "
+                "Please try opening it manually."
+            )
+            return 1
+
+        return 0
 
 
 ui = Console()
